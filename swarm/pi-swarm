@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Launch pi from this fork's sources with the swarm orchestrator extension.
+# Safe to symlink onto PATH; the repo root is resolved through the symlink.
+set -euo pipefail
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+  DIR="$(cd "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+PI_ROOT="$(cd "$(dirname "$SOURCE")/.." && pwd)"
+
+# Subagents are spawned with the same from-source pi.
+export PI_SWARM_PI_BIN="${PI_SWARM_PI_BIN:-$PI_ROOT/pi-test.sh}"
+
+exec "$PI_ROOT/pi-test.sh" -e "$PI_ROOT/swarm/index.ts" "$@"
